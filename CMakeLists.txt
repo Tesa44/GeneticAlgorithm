@@ -3,4 +3,13 @@ project(PEA_projekt_3)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(PEA_projekt_3 main.cpp)
+add_executable(PEA_projekt_3 main.cpp
+        App.cpp
+        Helpers.cpp
+        Model.cpp
+        algorithms/Greedy.cpp
+        algorithms/SimAnnealing.cpp
+        algorithms/TabuSearch.cpp
+        Menu.cpp
+        algorithms/GeneticAlgorithm.cpp
+        algorithms/GeneticAlgorithm.h)

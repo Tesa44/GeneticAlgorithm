@@ -6,6 +6,7 @@
 #define APP_H
 #include "Menu.h"
 #include "Model.h"
+#include "algorithms/GeneticAlgorithm.h"
 #include "algorithms/Greedy.h"
 #include "algorithms/SimAnnealing.h"
 #include "algorithms/TabuSearch.h"
@@ -28,6 +29,8 @@ private:
     SimAnnealing sw;
     Model model;
     Greedy greedy;
+
+    GeneticAlgorithm ga;
 
 };
 

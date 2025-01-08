@@ -83,8 +83,10 @@ void Menu::algorithmsMenu() {
     cout << "Wybierz algorytm do problemu ATSP" << endl;
     cout << "1. Algorytm Tabu Search" << endl;
     cout << "2. Algorytm Symulowanego Wyzarzania" << endl;
+    cout << "3. Algorytm Genetyczny" << endl;
     cin >> algorithmChoice;
-    if (checkChoices(algorithmChoice, '2')) return;
+    if (checkChoices(algorithmChoice, '3'))
+        return;
 }
 
 double Menu::inputStop() {

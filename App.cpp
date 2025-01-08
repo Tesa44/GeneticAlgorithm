@@ -44,6 +44,10 @@ void App::run()
             ts.setNumCities(model.getNumCities());
             sw.setDistanceMatrix(model.getDistanceMatrix());
             sw.setNumCities(model.getNumCities());
+
+            ga.setDistanceMatrix(model.getDistanceMatrix());
+            ga.setNumCities(model.getNumCities());
+
             isMatrix = true;
             cout << "Wczytano macierz" << endl;
             break;
@@ -102,6 +106,8 @@ void App::runAlgorithms()
         case '2':
             solution = sw.solve();
             break;
+        case '3':
+            solution = ga.solve();
             default:
                 cout << "Error" << endl;
         }
