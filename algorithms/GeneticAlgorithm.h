@@ -26,10 +26,13 @@ private:
     // Dane wejściowe
     int** distances;
     int numCities = 0;
-    int populationSize = 100;
-    int generations = 1500;
+    int populationSize = 150;
+    int generations = 2000;
     double mutationRate = 0.02;
     int tournamentSize = 3;
+    double elitismRate = 0.2;   // Współczynnik elityzmu, np. 0.1
+    double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.9
+
 
 
     // Generator liczb losowych
@@ -39,9 +42,17 @@ private:
     int calculateDistance(int* route);
     void generateRandomRoute(int* route);
     void tournamentSelection(int** population, int* fitness, int* selected);
+    void tournamentSelectionDistinct(int** population, int* fitness, int* parent1, int* parent2);
+    void chooseParents(int** population, int* fitness, int* parent1, int* parent2, int* areParents);
     void crossover(int* parent1, int* parent2, int* child);
+    void pmxCrossover(int* parent1, int* parent2, int* child);
     void mutate(int* route);
     void displayMatrix(int** matrix, int n);
+    void displayArray(int* arr, int n);
+    bool isParent(int* parents, int target);
+    int findEl(int* arr, int size, int target);
+    bool isUnique(int* arr, int size);
+    bool inArr(int* arr, int size, int target);
 };
 
 #endif // GENETIC_ALGORITHM_H
