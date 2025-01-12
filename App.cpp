@@ -38,7 +38,8 @@ void App::run()
             }
             break;
         case '2':
-            path = menu.inputPath();
+            // path = menu.inputPath();
+                path = "ftv55.atsp";
             model.loadFromFile(path);
             ts.setDistanceMatrix(model.getDistanceMatrix());
             ts.setNumCities(model.getNumCities());
@@ -108,6 +109,7 @@ void App::runAlgorithms()
             break;
         case '3':
             solution = ga.solve();
+            break;
             default:
                 cout << "Error" << endl;
         }

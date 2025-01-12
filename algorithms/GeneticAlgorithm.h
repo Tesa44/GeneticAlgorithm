@@ -32,7 +32,7 @@ private:
     int tournamentSize = 3;
     double elitismRate = 0.2;   // Współczynnik elityzmu, np. 0.1
     double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.9
-
+    double timeLimit = 1020.0;
 
 
     // Generator liczb losowych
