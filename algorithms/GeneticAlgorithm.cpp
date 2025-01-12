@@ -195,6 +195,39 @@ void GeneticAlgorithm::pmxCrossover(int* parent1, int* parent2, int* child) {
     }
 }
 
+void GeneticAlgorithm::orderCrossover(int* parent1, int* parent2, int* child) {
+    // Losowy wybór dwóch punktów podziału
+    std::uniform_int_distribution<> dist(0, numCities - 1);
+
+    int start = dist(gen);
+    int end = dist(gen);
+    while (start == end) {
+        start = dist(gen);
+        end = dist(gen);
+    }
+    if (start > end) std::swap(start, end);
+
+    int segmentSize = end - start + 1;
+    // Inicjalizacja dziecka
+    for (int i = 0; i < numCities; ++i) {
+        child[i] = -1;
+    }
+    // Kopiowanie segmentu P1 zachowując względną kolejność miast w cyklu
+    memcpy(child + start, parent1 + start, segmentSize * sizeof(int));
+
+    int p2Index = end;
+    int childIndex = end;
+    int p2El;
+    for (int i = 0 ; i < numCities; i++) {
+        p2Index = ++p2Index % numCities;
+        p2El = parent2[p2Index];
+        if (!inArr(child, numCities, p2El)) {
+            childIndex = ++childIndex % numCities;
+            child[childIndex] = p2El;
+        }
+    }
+}
+
 // Mutacja - zamiana dwóch miast
 void GeneticAlgorithm::mutate(int* route) {
     uniform_int_distribution<> dist(0, numCities - 1);
@@ -256,8 +289,10 @@ int* GeneticAlgorithm::solve() {
                 tournamentSelectionDistinct(population,fitness,parent1,parent2);
                 // Krzyżowanie z prawdopodobieństwem crossoverRate
                 if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
-                    pmxCrossover(parent1, parent2, newPopulation[i]);
-                    pmxCrossover(parent2, parent1, newPopulation[i+1]);
+                    // pmxCrossover(parent1, parent2, newPopulation[i]);
+                    // pmxCrossover(parent2, parent1, newPopulation[i+1]);
+                    orderCrossover(parent1,parent2,newPopulation[i]);
+                    orderCrossover(parent2,parent1,newPopulation[i+1]);
                 } else {
                     // Brak krzyżowania, kopiowanie rodzica
                     memcpy(newPopulation[i], parent1, numCities * sizeof(int));

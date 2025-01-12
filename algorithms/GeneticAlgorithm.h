@@ -32,7 +32,7 @@ private:
     int tournamentSize = 3;
     double elitismRate = 0.2;   // Współczynnik elityzmu, np. 0.1
     double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.9
-    double timeLimit = 1020.0;
+    double timeLimit = 100.0;
 
 
     // Generator liczb losowych
@@ -46,6 +46,7 @@ private:
     void chooseParents(int** population, int* fitness, int* parent1, int* parent2, int* areParents);
     void crossover(int* parent1, int* parent2, int* child);
     void pmxCrossover(int* parent1, int* parent2, int* child);
+    void orderCrossover(int* parent1, int* parent2, int* child);
     void mutate(int* route);
     void displayMatrix(int** matrix, int n);
     void displayArray(int* arr, int n);
