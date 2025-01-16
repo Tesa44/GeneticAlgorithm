@@ -27,14 +27,13 @@ private:
     // Dane wejściowe
     int** distances;
     int numCities = 0;
-    int populationSize = 150;
-    int generations = 2000;
+    int populationSize = 200; // 50 / 100 / 200
+    int generations = 2000; // 1000 - 2000
     double mutationRate = 0.01;
     int tournamentSize = 3;
-    double elitismRate = 0.2;   // Współczynnik elityzmu, np. 0.1
-    double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.9
-    double timeLimit = 100.0;
-
+    double elitismRate = 0.4;   // Współczynnik elityzmu, np. 0.2
+    double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.8
+    double timeLimit = 10.0;
 
     // Generator liczb losowych
     std::mt19937 gen;

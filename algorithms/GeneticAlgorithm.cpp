@@ -151,10 +151,9 @@ void GeneticAlgorithm::pmxCrossover(int* parent1, int* parent2, int* child) {
         int end = dist(gen);
         while (start == end) {
             start = dist(gen);
-            end = dist(gen);
         }
         if (start > end) std::swap(start, end);
-
+        // cout << "start: " << start << " end: " << end << endl;
         int segmentSize = end - start + 1;
         int* segment = new int[segmentSize];
         memcpy(segment, parent1 + start, segmentSize * sizeof(int));
@@ -243,105 +242,214 @@ void GeneticAlgorithm::mutate(int* route) {
 }
 
 
+// int* GeneticAlgorithm::solve() {
+//     auto startTime = std::chrono::steady_clock::now();
+//     int* bestRoute = new int[numCities + 1];
+//     int bestCost = numeric_limits<int>::max();
+//     double bestFindTime = 0;
+//     while (true) {
+//         auto currentTime = std::chrono::steady_clock::now();
+//         double elapsedTime = std::chrono::duration<double>(currentTime - startTime).count();
+//         if (elapsedTime > timeLimit) break;
+//         // Inicjalizacja populacji
+//         int** population = new int*[populationSize];
+//         for (int i = 0; i < populationSize; ++i) {
+//             population[i] = new int[numCities];
+//             generateRandomRoute(population[i]);
+//         }
+//         // for (int i = 0; i < populationSize; ++i)
+//         // {
+//         // displayArray(population[i],numCities);
+//         // }
+//
+//         int* fitness = new int[populationSize];
+//
+//         int elitismCount = static_cast<int>(elitismRate * populationSize);
+//
+//         // Ewolucja
+//         for (int generation = 0; generation < generations; ++generation) {
+//             // Obliczanie przystosowania
+//             for (int i = 0; i < populationSize; ++i) {
+//                 fitness[i] = calculateDistance(population[i]);
+//             }
+//             // Tworzenie nowej populacji
+//             int** newPopulation = new int*[populationSize];
+//
+//             // Elitarne osobniki - kopiowanie najlepszych do nowej populacji
+//             for (int i = 0; i < elitismCount; i++) {
+//                 newPopulation[i] = new int[numCities];
+//                 int bestIndex = min_element(fitness, fitness + populationSize) - fitness;
+//                 memcpy(newPopulation[i], population[bestIndex], numCities * sizeof(int));
+//                 fitness[bestIndex] = numeric_limits<int>::max(); // Wyklucz najlepszy z kolejnych wyborów
+//
+//             }
+//
+//             // Reszta populacji - krzyżowanie i mutacja
+//             for (int i = elitismCount; i < populationSize; i+=2) {
+//                 newPopulation[i] = new int[numCities];
+//                 newPopulation[i+1] = new int[numCities];
+//                 int* parent1 = new int[numCities];
+//                 int* parent2 = new int[numCities];
+//                 //Wybieranie rodziców
+//                 tournamentSelectionDistinct(population,fitness,parent1,parent2);
+//                 // Krzyżowanie z prawdopodobieństwem crossoverRate
+//                 if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
+//                     (this->*crossoverFunc)(parent1,parent2,newPopulation[i]);
+//                     (this->*crossoverFunc)(parent2,parent1,newPopulation[i+1]);
+//                 } else {
+//                     // Brak krzyżowania, kopiowanie rodzica
+//                     memcpy(newPopulation[i], parent1, numCities * sizeof(int));
+//                     memcpy(newPopulation[i+1], parent2, numCities * sizeof(int));
+//                 }
+//                 // Mutacja
+//                 if (uniform_real_distribution<>(0.0, 1.0)(gen) < mutationRate) {
+//                     mutate(newPopulation[i]);
+//                     mutate(newPopulation[i+1]);
+//                 }
+//                 delete[] parent1;
+//                 delete[] parent2;
+//             }
+//             // Zamiana starej populacji na nową
+//             for (int i = 0; i < populationSize; ++i) {
+//                 delete[] population[i];
+//             }
+//             delete[] population;
+//
+//             population = newPopulation;
+//         }
+//
+//         // Znalezienie najlepszego rozwiązania
+//         // bestRoute = new int[numCities + 1];
+//
+//         for (int i = 0; i < populationSize; ++i) {
+//             int cost = calculateDistance(population[i]);
+//             if (cost < bestCost) {
+//                 bestCost = cost;
+//                 memcpy(bestRoute, population[i], numCities * sizeof(int));
+//                 bestRoute[numCities] = bestRoute[0];
+//                 bestFindTime = elapsedTime;
+//             }
+//         }
+//
+//         // Czyszczenie pamięci
+//         for (int i = 0; i < populationSize; ++i) {
+//             delete[] population[i];
+//         }
+//         delete[] population;
+//         delete[] fitness;
+//     }
+//     cout << "Czas znalezienia najlepszego rozwiazania: " << bestFindTime << " [s]" << endl;
+//     return bestRoute;
+// }
+
 int* GeneticAlgorithm::solve() {
     auto startTime = std::chrono::steady_clock::now();
     int* bestRoute = new int[numCities + 1];
-    int bestCost = numeric_limits<int>::max();
+    int bestCost = std::numeric_limits<int>::max();
     double bestFindTime = 0;
+
+    // Inicjalizacja populacji
+    int** population = new int*[populationSize];
+    for (int i = 0; i < populationSize; ++i) {
+        population[i] = new int[numCities];
+        generateRandomRoute(population[i]);
+    }
+
+    int* fitness = new int[populationSize];
+    int elitismCount = static_cast<int>(elitismRate * populationSize);
+    int iterations = 0;
     while (true) {
         auto currentTime = std::chrono::steady_clock::now();
         double elapsedTime = std::chrono::duration<double>(currentTime - startTime).count();
         if (elapsedTime > timeLimit) break;
-        // Inicjalizacja populacji
-        int** population = new int*[populationSize];
+        iterations++;
+        // Obliczanie przystosowania
         for (int i = 0; i < populationSize; ++i) {
-            population[i] = new int[numCities];
-            generateRandomRoute(population[i]);
-        }
-        // for (int i = 0; i < populationSize; ++i)
-        // {
-        // displayArray(population[i],numCities);
-        // }
-
-        int* fitness = new int[populationSize];
-
-        int elitismCount = static_cast<int>(elitismRate * populationSize);
-
-        // Ewolucja
-        for (int generation = 0; generation < generations; ++generation) {
-            // Obliczanie przystosowania
-            for (int i = 0; i < populationSize; ++i) {
-                fitness[i] = calculateDistance(population[i]);
-            }
-            // Tworzenie nowej populacji
-            int** newPopulation = new int*[populationSize];
-
-            // Elitarne osobniki - kopiowanie najlepszych do nowej populacji
-            for (int i = 0; i < elitismCount; i++) {
-                newPopulation[i] = new int[numCities];
-                int bestIndex = min_element(fitness, fitness + populationSize) - fitness;
-                memcpy(newPopulation[i], population[bestIndex], numCities * sizeof(int));
-                fitness[bestIndex] = numeric_limits<int>::max(); // Wyklucz najlepszy z kolejnych wyborów
-
-            }
-
-            // Reszta populacji - krzyżowanie i mutacja
-            for (int i = elitismCount; i < populationSize; i+=2) {
-                newPopulation[i] = new int[numCities];
-                newPopulation[i+1] = new int[numCities];
-                int* parent1 = new int[numCities];
-                int* parent2 = new int[numCities];
-                //Wybieranie rodziców
-                tournamentSelectionDistinct(population,fitness,parent1,parent2);
-                // Krzyżowanie z prawdopodobieństwem crossoverRate
-                if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
-                    (this->*crossoverFunc)(parent1,parent2,newPopulation[i]);
-                    (this->*crossoverFunc)(parent2,parent1,newPopulation[i+1]);
-                } else {
-                    // Brak krzyżowania, kopiowanie rodzica
-                    memcpy(newPopulation[i], parent1, numCities * sizeof(int));
-                    memcpy(newPopulation[i+1], parent2, numCities * sizeof(int));
-                }
-                // Mutacja
-                if (uniform_real_distribution<>(0.0, 1.0)(gen) < mutationRate) {
-                    mutate(newPopulation[i]);
-                    mutate(newPopulation[i+1]);
-                }
-                delete[] parent1;
-                delete[] parent2;
-            }
-            // Zamiana starej populacji na nową
-            for (int i = 0; i < populationSize; ++i) {
-                delete[] population[i];
-            }
-            delete[] population;
-
-            population = newPopulation;
+            fitness[i] = calculateDistance(population[i]);
         }
 
-        // Znalezienie najlepszego rozwiązania
-        // bestRoute = new int[numCities + 1];
+        // Tworzenie nowej populacji
+        int** newPopulation = new int*[populationSize];
 
+        // Elitarne osobniki - kopiowanie najlepszych do nowej populacji
+        for (int i = 0; i < elitismCount; i++) {
+            newPopulation[i] = new int[numCities];
+            int bestIndex = std::min_element(fitness, fitness + populationSize) - fitness;
+            memcpy(newPopulation[i], population[bestIndex], numCities * sizeof(int));
+            fitness[bestIndex] = std::numeric_limits<int>::max(); // Wyklucz najlepszy z kolejnych wyborów
+        }
+
+        // Reszta populacji - krzyżowanie i mutacja
+        for (int i = elitismCount; i < populationSize; i += 2) {
+            newPopulation[i] = new int[numCities];
+            newPopulation[i + 1] = new int[numCities];
+            int* parent1 = new int[numCities];
+            int* parent2 = new int[numCities];
+
+            // Wybieranie rodziców
+            tournamentSelectionDistinct(population, fitness, parent1, parent2);
+            cout << "parent1 " << endl;
+            displayArray(parent1, numCities);
+            cout << "parent2 " << endl;
+            displayArray(parent2,numCities);
+            // Krzyżowanie z prawdopodobieństwem crossoverRate
+            if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
+                (this->*crossoverFunc)(parent1, parent2, newPopulation[i]);
+                (this->*crossoverFunc)(parent2, parent1, newPopulation[i + 1]);
+                displayArray(newPopulation[i],numCities);
+                displayArray(newPopulation[i + 1],numCities);
+                getch();
+            } else {
+                // Brak krzyżowania, kopiowanie rodzica
+                memcpy(newPopulation[i], parent1, numCities * sizeof(int));
+                memcpy(newPopulation[i + 1], parent2, numCities * sizeof(int));
+            }
+
+            // Mutacja
+            if (uniform_real_distribution<>(0.0, 1.0)(gen) < mutationRate) {
+                mutate(newPopulation[i]);
+            }
+            if (uniform_real_distribution<>(0.0, 1.0)(gen) < mutationRate) {
+                mutate(newPopulation[i + 1]);
+            }
+
+            delete[] parent1;
+            delete[] parent2;
+        }
+
+        // Zamiana starej populacji na nową
+        for (int i = 0; i < populationSize; ++i) {
+            delete[] population[i];
+        }
+        delete[] population;
+
+        population = newPopulation;
+
+        // Znalezienie najlepszego rozwiązania w obecnej populacji
         for (int i = 0; i < populationSize; ++i) {
             int cost = calculateDistance(population[i]);
             if (cost < bestCost) {
                 bestCost = cost;
+                cout << bestCost << endl;
                 memcpy(bestRoute, population[i], numCities * sizeof(int));
                 bestRoute[numCities] = bestRoute[0];
                 bestFindTime = elapsedTime;
             }
         }
-
-        // Czyszczenie pamięci
-        for (int i = 0; i < populationSize; ++i) {
-            delete[] population[i];
-        }
-        delete[] population;
-        delete[] fitness;
     }
-    cout << "Czas znalezienia najlepszego rozwiazania: " << bestFindTime << " [s]" << endl;
+
+    // Czyszczenie pamięci
+    for (int i = 0; i < populationSize; ++i) {
+        delete[] population[i];
+    }
+    delete[] population;
+    delete[] fitness;
+
+    std::cout << "Czas znalezienia najlepszego rozwiązania: " << bestFindTime << " [s]" << std::endl;
+    cout << "Liczba iteracji: " << iterations << endl;
     return bestRoute;
 }
+
 
 void GeneticAlgorithm::setCrossover(int choice) {
     switch (choice) {

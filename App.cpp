@@ -113,13 +113,18 @@ void App::runAlgorithms()
             solution = sw.solve();
             break;
         case '3':
-            solution = ga.solve();
+            for (int i = 1 ;i <= 10; i++)
+            {
+                cout << "wynik " << i << endl;
+                solution = ga.solve();
+                model.saveResultToFile(filepath,solution,model.getNumCities());
+                cout << "Najkrotsza sciezka: " << model.calculateCostFromFile(filepath,model.getDistanceMatrix()) << endl;
+            }
             break;
             default:
                 cout << "Error" << endl;
         }
-        model.saveResultToFile(filepath,solution,model.getNumCities());
-        cout << "Najkrotsza sciezka: " << model.calculateCostFromFile(filepath,model.getDistanceMatrix()) << endl;
+
 
         delete[] solution;
 
