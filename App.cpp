@@ -78,6 +78,7 @@ void App::run()
             gaChoice = menu.gaChoice - '0';
             ga.setNumCities(gaChoice);
             cout << "Zmieniono metode krzyzowania" << endl;
+            break;
         case '8':
             if (isMatrix)
             {

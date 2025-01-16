@@ -228,12 +228,18 @@ void GeneticAlgorithm::orderCrossover(int* parent1, int* parent2, int* child) {
     }
 }
 
-// Mutacja - zamiana dwóch miast
+// Mutacja - inversion Mutation
 void GeneticAlgorithm::mutate(int* route) {
     uniform_int_distribution<> dist(0, numCities - 1);
     int i = dist(gen);
     int j = dist(gen);
-    swap(route[i], route[j]);
+    while (i == j) {
+        j = dist(gen);
+    }
+    if (i > j) {
+        swap(i, j);
+    }
+    std::reverse(route + i, route + j + 1);
 }
 
 

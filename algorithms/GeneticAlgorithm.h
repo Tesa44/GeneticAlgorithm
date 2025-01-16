@@ -29,7 +29,7 @@ private:
     int numCities = 0;
     int populationSize = 150;
     int generations = 2000;
-    double mutationRate = 0.02;
+    double mutationRate = 0.01;
     int tournamentSize = 3;
     double elitismRate = 0.2;   // Współczynnik elityzmu, np. 0.1
     double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.9

@@ -17,8 +17,9 @@ void Menu::mainMenu() {
         cout << "4. Wybierz metode sasiedztwa dla TS" << endl;
         cout << "5. Wybierz metode schladzania dla SW" << endl;
         cout << "6. Ustaw wspolczynnik a dla SW" << endl;
-        cout << "7. Rozwiaz metoda zachlanna" << endl;
-        cout << "8. Wyjdz z programu" << endl;
+        cout << "7. Wybierz metode krzyzowania dla GA" << endl;
+        cout << "8. Rozwiaz metoda zachlanna" << endl;
+        cout << "0. Wyjdz z programu" << endl;
         cin >> mainChoice;
         if (checkChoices(mainChoice, '8'))
             return;
