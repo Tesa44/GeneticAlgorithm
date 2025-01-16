@@ -15,13 +15,12 @@
 void App::run()
 {
     //Inicjalizacja
-    ts.setNeighborhood(1);
-
     bool isMatrix = false;
     string path;
     double timeLimit;
     int tsChoice;
     int smChoice;
+    int gaChoice;
     bool exit = false;
 
     while (!exit)
@@ -75,6 +74,11 @@ void App::run()
             cout << "Zmieniono wspolczynnik schladzania" << endl;
             break;
         case '7':
+            menu.gaMenu();
+            gaChoice = menu.gaChoice - '0';
+            ga.setNumCities(gaChoice);
+            cout << "Zmieniono metode krzyzowania" << endl;
+        case '8':
             if (isMatrix)
             {
                 solution = greedy.solve(model.getDistanceMatrix(), model.getNumCities());
@@ -89,7 +93,7 @@ void App::run()
                 cout << "Nie masz zadnej zapisane macierzy!" << endl;
             }
             break;
-        case '8':
+        case '0':
             exit = true;
             break;
         }

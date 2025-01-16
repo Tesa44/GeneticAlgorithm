@@ -48,6 +48,16 @@ void Menu::swMenu()
     }
 }
 
+void Menu::gaMenu()
+{
+    while (true) {
+    cout << "Wybierz jedna z metod krzyzowania dla GA" << endl;
+    cout << "1. PMX Crossover" << endl;
+    cout << "2. Order Crossover" << endl;
+    cin >> gaChoice;
+    if (checkChoices(gaChoice, '2')) return;
+    }
+}
 
 string Menu::inputPath() {
     string path;
@@ -58,8 +68,11 @@ string Menu::inputPath() {
 
 
 //Metoda służy do sprawdzania czy wybór wpisany przez użytkownika jest zgodny z jakimkolwiek wyborem
+
 //char choice - znak podany przez użytkownika określający wybór
+
 //char choiceQuantity - ile posiadamy wyborów w menu
+
 bool Menu::checkChoices(char choice, char choiceQuantity) {
     if (choice >= '1' && choice <= choiceQuantity)
         return true;
@@ -109,6 +122,7 @@ double Menu::inputStop() {
     }
 }
 
+
 double Menu::inputFactorA() {
     string input;
     bool guard;
@@ -128,4 +142,3 @@ double Menu::inputFactorA() {
         cout << "To nie jest liczba z zakresu 0 - 1" << endl;
     }
 }
-

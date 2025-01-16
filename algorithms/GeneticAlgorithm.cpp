@@ -289,10 +289,8 @@ int* GeneticAlgorithm::solve() {
                 tournamentSelectionDistinct(population,fitness,parent1,parent2);
                 // Krzyżowanie z prawdopodobieństwem crossoverRate
                 if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
-                    // pmxCrossover(parent1, parent2, newPopulation[i]);
-                    // pmxCrossover(parent2, parent1, newPopulation[i+1]);
-                    orderCrossover(parent1,parent2,newPopulation[i]);
-                    orderCrossover(parent2,parent1,newPopulation[i+1]);
+                    (this->*crossoverFunc)(parent1,parent2,newPopulation[i]);
+                    (this->*crossoverFunc)(parent2,parent1,newPopulation[i+1]);
                 } else {
                     // Brak krzyżowania, kopiowanie rodzica
                     memcpy(newPopulation[i], parent1, numCities * sizeof(int));
@@ -337,6 +335,19 @@ int* GeneticAlgorithm::solve() {
     }
     cout << "Czas znalezienia najlepszego rozwiazania: " << bestFindTime << " [s]" << endl;
     return bestRoute;
+}
+
+void GeneticAlgorithm::setCrossover(int choice) {
+    switch (choice) {
+    case 1:
+        crossoverFunc = &GeneticAlgorithm::pmxCrossover;
+        break;
+    case 2:
+        crossoverFunc = &GeneticAlgorithm::orderCrossover;
+        break;
+    default:
+        throw std::invalid_argument("Niepoprawny wybór sąsiedztwa");
+    }
 }
 
 

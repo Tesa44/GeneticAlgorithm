@@ -21,6 +21,7 @@ public:
     //Settey
     void setNumCities(int newNumCities);
     void setDistanceMatrix(int** newDistanceMatrix);
+    void setCrossover(int choice);
 
 private:
     // Dane wejściowe
@@ -47,6 +48,7 @@ private:
     void crossover(int* parent1, int* parent2, int* child);
     void pmxCrossover(int* parent1, int* parent2, int* child);
     void orderCrossover(int* parent1, int* parent2, int* child);
+    void (GeneticAlgorithm::*crossoverFunc)(int*, int*, int*) = &pmxCrossover; // Wskaźnik na funkcję definiującą sąsiedztwo
     void mutate(int* route);
     void displayMatrix(int** matrix, int n);
     void displayArray(int* arr, int n);

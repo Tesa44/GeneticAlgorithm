@@ -14,12 +14,14 @@ public:
     char exitConfirmChoice;
     char tsChoice;
     char swChoice;
+    char gaChoice;
     void mainMenu();
     void algorithmsMenu();
     double inputStop();
     double inputFactorA();
     void tsMenu();
     void swMenu();
+    void gaMenu();
     int n;
     bool checkChoices(char choice, char choiceQuantity);
     string inputPath();
