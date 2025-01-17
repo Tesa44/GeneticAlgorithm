@@ -142,6 +142,39 @@ void GeneticAlgorithm::crossover(int* parent1, int* parent2, int* child) {
     delete[] used;
 }
 
+void GeneticAlgorithm::orderCrossover(int* parent1, int* parent2, int* child) {
+    // Losowy wybór dwóch punktów podziału
+    std::uniform_int_distribution<> dist(0, numCities - 1);
+
+    int start = dist(gen);
+    int end = dist(gen);
+    while (start == end) {
+        start = dist(gen);
+        end = dist(gen);
+    }
+    if (start > end) std::swap(start, end);
+
+    int segmentSize = end - start + 1;
+    // Inicjalizacja dziecka
+    for (int i = 0; i < numCities; ++i) {
+        child[i] = -1;
+    }
+    // Kopiowanie segmentu P1 zachowując względną kolejność miast w cyklu
+    memcpy(child + start, parent1 + start, segmentSize * sizeof(int));
+
+    int p2Index = end;
+    int childIndex = end;
+    int p2El;
+    for (int i = 0 ; i < numCities; i++) {
+        p2Index = ++p2Index % numCities;
+        p2El = parent2[p2Index];
+        if (!inArr(child, numCities, p2El)) {
+            childIndex = ++childIndex % numCities;
+            child[childIndex] = p2El;
+        }
+    }
+}
+
 void GeneticAlgorithm::pmxCrossover(int* parent1, int* parent2, int* child) {
     {
         // Losowy wybór dwóch punktów podziału
@@ -194,38 +227,63 @@ void GeneticAlgorithm::pmxCrossover(int* parent1, int* parent2, int* child) {
     }
 }
 
-void GeneticAlgorithm::orderCrossover(int* parent1, int* parent2, int* child) {
-    // Losowy wybór dwóch punktów podziału
+// Metoda krzyżowania PMX (Partially Mapped Crossover)
+void GeneticAlgorithm::crossoverPMX(int* parent1, int* parent2, int* child) {
     std::uniform_int_distribution<> dist(0, numCities - 1);
 
+    // Losowanie punktów podziału
     int start = dist(gen);
     int end = dist(gen);
-    while (start == end) {
-        start = dist(gen);
-        end = dist(gen);
+    if (start > end) {
+        std::swap(start, end);
     }
-    if (start > end) std::swap(start, end);
 
-    int segmentSize = end - start + 1;
     // Inicjalizacja dziecka
     for (int i = 0; i < numCities; ++i) {
         child[i] = -1;
     }
-    // Kopiowanie segmentu P1 zachowując względną kolejność miast w cyklu
-    memcpy(child + start, parent1 + start, segmentSize * sizeof(int));
 
-    int p2Index = end;
-    int childIndex = end;
-    int p2El;
-    for (int i = 0 ; i < numCities; i++) {
-        p2Index = ++p2Index % numCities;
-        p2El = parent2[p2Index];
-        if (!inArr(child, numCities, p2El)) {
-            childIndex = ++childIndex % numCities;
-            child[childIndex] = p2El;
+    // Kopiowanie segmentu z rodzica 1 do dziecka
+    for (int i = start; i <= end; ++i) {
+        child[i] = parent1[i];
+    }
+
+    // Mapowanie brakujących elementów z rodzica 2
+    for (int i = start; i <= end; ++i) {
+        int mappedCity = parent2[i];
+
+        // Sprawdzenie konfliktu
+        if (std::find(child + start, child + end + 1, mappedCity) == child + end + 1) {
+            int pos = i;
+
+            // Znajdowanie unikalnej pozycji w cyklu
+            while (std::find(child + start, child + end + 1, parent1[pos]) != child + end + 1) {
+                for (int k = 0; k < numCities; ++k) {
+                    if (parent2[k] == parent1[pos]) {
+                        pos = k;
+                        break;
+                    }
+                }
+            }
+
+            // Wstawienie elementu w odpowiednie miejsce
+            child[pos] = mappedCity;
+        }
+    }
+
+    // Wypełnienie pozostałych miejsc z rodzica 2
+    int childIndex = 0;
+    for (int i = 0; i < numCities; ++i) {
+        if (std::find(child, child + numCities, parent2[i]) == child + numCities) {
+            while (child[childIndex] != -1) {
+                ++childIndex;
+            }
+            child[childIndex] = parent2[i];
         }
     }
 }
+
+
 
 // Mutacja - inversion Mutation
 void GeneticAlgorithm::mutate(int* route) {
@@ -388,17 +446,17 @@ int* GeneticAlgorithm::solve() {
 
             // Wybieranie rodziców
             tournamentSelectionDistinct(population, fitness, parent1, parent2);
-            cout << "parent1 " << endl;
-            displayArray(parent1, numCities);
-            cout << "parent2 " << endl;
-            displayArray(parent2,numCities);
+            // cout << "parent1 " << endl;
+            // displayArray(parent1, numCities);
+            // cout << "parent2 " << endl;
+            // displayArray(parent2,numCities);
             // Krzyżowanie z prawdopodobieństwem crossoverRate
             if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
                 (this->*crossoverFunc)(parent1, parent2, newPopulation[i]);
                 (this->*crossoverFunc)(parent2, parent1, newPopulation[i + 1]);
-                displayArray(newPopulation[i],numCities);
-                displayArray(newPopulation[i + 1],numCities);
-                getch();
+                // displayArray(newPopulation[i],numCities);
+                // displayArray(newPopulation[i + 1],numCities);
+                // getch();
             } else {
                 // Brak krzyżowania, kopiowanie rodzica
                 memcpy(newPopulation[i], parent1, numCities * sizeof(int));

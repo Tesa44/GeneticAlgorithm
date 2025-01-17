@@ -31,9 +31,9 @@ private:
     int generations = 2000; // 1000 - 2000
     double mutationRate = 0.01;
     int tournamentSize = 3;
-    double elitismRate = 0.4;   // Współczynnik elityzmu, np. 0.2
+    double elitismRate = 0.2;   // Współczynnik elityzmu, np. 0.2
     double crossoverRate = 0.8; // Prawdopodobieństwo krzyżowania, np. 0.8
-    double timeLimit = 10.0;
+    double timeLimit = 100.0;
 
     // Generator liczb losowych
     std::mt19937 gen;
@@ -46,8 +46,9 @@ private:
     void chooseParents(int** population, int* fitness, int* parent1, int* parent2, int* areParents);
     void crossover(int* parent1, int* parent2, int* child);
     void pmxCrossover(int* parent1, int* parent2, int* child);
+    void crossoverPMX(int* parent1, int* parent2, int* child);
     void orderCrossover(int* parent1, int* parent2, int* child);
-    void (GeneticAlgorithm::*crossoverFunc)(int*, int*, int*) = &pmxCrossover; // Wskaźnik na funkcję definiującą sąsiedztwo
+    void (GeneticAlgorithm::*crossoverFunc)(int*, int*, int*) = &crossoverPMX; // Wskaźnik na funkcję definiującą sąsiedztwo
     void mutate(int* route);
     void displayMatrix(int** matrix, int n);
     void displayArray(int* arr, int n);
