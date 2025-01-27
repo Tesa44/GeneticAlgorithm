@@ -405,6 +405,13 @@ int* GeneticAlgorithm::solve() {
     int* bestRoute = new int[numCities + 1];
     int bestCost = std::numeric_limits<int>::max();
     double bestFindTime = 0;
+    //Parametry do liczenia średniego względnego błedu
+    int opt = 2755;
+    double interval = 10.0; //Interwal co ile mierzymy sredni błąd względny
+    double lastMeasurementTime = 0.0;
+    int measurementSize = 100;
+    double* measurement = new double[measurementSize];
+    int measurementIndex = 0;
 
     // Inicjalizacja populacji
     int** population = new int*[populationSize];
@@ -419,11 +426,23 @@ int* GeneticAlgorithm::solve() {
     while (true) {
         auto currentTime = std::chrono::steady_clock::now();
         double elapsedTime = std::chrono::duration<double>(currentTime - startTime).count();
-        if (elapsedTime > timeLimit) break;
+        if (elapsedTime > timeLimit)
+        {
+            break;
+        };
         iterations++;
         // Obliczanie przystosowania
         for (int i = 0; i < populationSize; ++i) {
             fitness[i] = calculateDistance(population[i]);
+        }
+
+        if (std::chrono::duration<double>(elapsedTime - lastMeasurementTime).count() > interval)
+        {
+            double avgResult = countAvgResult(fitness);
+            double avgError = (avgResult - opt) / opt;
+            measurement[measurementIndex++] = avgError;
+            // cout << "Blad wzgledny w" << elapsedTime << " sekundzie: " <<avgError << " Sredni wynik: " << avgResult <<endl;
+            lastMeasurementTime = elapsedTime;
         }
 
         // Tworzenie nowej populacji
@@ -488,13 +507,21 @@ int* GeneticAlgorithm::solve() {
             int cost = calculateDistance(population[i]);
             if (cost < bestCost) {
                 bestCost = cost;
-                cout << bestCost << endl;
+                // cout << bestCost << endl;
                 memcpy(bestRoute, population[i], numCities * sizeof(int));
                 bestRoute[numCities] = bestRoute[0];
                 bestFindTime = elapsedTime;
             }
         }
     }
+    //Ostatni sredni blad wzgledny
+    for (int i = 0; i < populationSize; ++i) {
+        fitness[i] = calculateDistance(population[i]);
+    }
+    double avgResult = countAvgResult(fitness);
+    double avgError = (avgResult - opt) / opt;
+    measurement[measurementIndex] = avgError;
+    // cout << "Blad wzgledny w" << timeLimit << " sekundzie: " <<avgError << " Sredni wynik: " << avgResult <<endl;
 
     // Czyszczenie pamięci
     for (int i = 0; i < populationSize; ++i) {
@@ -504,7 +531,10 @@ int* GeneticAlgorithm::solve() {
     delete[] fitness;
 
     std::cout << "Czas znalezienia najlepszego rozwiązania: " << bestFindTime << " [s]" << std::endl;
-    cout << "Liczba iteracji: " << iterations << endl;
+    // cout << "Liczba iteracji: " << iterations << endl;
+    cout << "Srednie bledy wzgledne: "<< endl;
+    displayArraydouble(measurement,measurementSize);
+    delete[] measurement;
     return bestRoute;
 }
 
@@ -544,6 +574,15 @@ void GeneticAlgorithm::displayMatrix(int** matrix, int n)
 }
 
 void GeneticAlgorithm::displayArray(int* arr, int n) {
+    cout << "[ ";
+    for (int i = 0 ; i < n ; i++)
+    {
+        cout << arr[i] << " ";
+    }
+    cout << "]" << endl;
+}
+
+void GeneticAlgorithm::displayArraydouble(double* arr, int n) {
     cout << "[ ";
     for (int i = 0 ; i < n ; i++)
     {
@@ -599,4 +638,19 @@ bool GeneticAlgorithm::isUnique(int* arr, int size) {
     }
     delete[] counter;
     return true;
+}
+
+void GeneticAlgorithm::setTimeLimit(double timeLimit)
+{
+    this->timeLimit = timeLimit;
+}
+
+double GeneticAlgorithm::countAvgResult(int* fitness)
+{
+    int sum = 0;
+    for (int i = 0; i < populationSize; ++i)
+    {
+        sum += fitness[i];
+    }
+    return sum / populationSize;
 }

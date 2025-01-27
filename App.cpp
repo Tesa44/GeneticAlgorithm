@@ -55,6 +55,7 @@ void App::run()
             timeLimit = menu.inputStop();
             ts.setTimeLimit(timeLimit);
             sw.setTimeLimit(timeLimit);
+            ga.setTimeLimit(timeLimit);
             cout << "Zmieniono kryterium stopu" << endl;
             break;
         case '4':
@@ -76,7 +77,7 @@ void App::run()
         case '7':
             menu.gaMenu();
             gaChoice = menu.gaChoice - '0';
-            ga.setNumCities(gaChoice);
+            ga.setCrossover(gaChoice);
             cout << "Zmieniono metode krzyzowania" << endl;
             break;
         case '8':
