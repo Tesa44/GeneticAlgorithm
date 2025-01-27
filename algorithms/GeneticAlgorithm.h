@@ -9,14 +9,9 @@
 
 class GeneticAlgorithm {
 public:
-    // Konstruktor
-    // GeneticAlgorithm(double** distances, int numCities, int populationSize, int generations, double mutationRate, int tournamentSize);
 
     // Metoda do uruchomienia algorytmu
     int* solve();
-
-    // Destruktor
-    // ~GeneticAlgorithm();
 
     //Settey
     void setNumCities(int newNumCities);
@@ -42,18 +37,11 @@ private:
     // Funkcje pomocnicze
     int calculateDistance(int* route);
     void generateRandomRoute(int* route);
-    void tournamentSelection(int** population, int* fitness, int* selected);
     void tournamentSelectionDistinct(int** population, int* fitness, int* parent1, int* parent2);
-    void chooseParents(int** population, int* fitness, int* parent1, int* parent2, int* areParents);
-    void crossover(int* parent1, int* parent2, int* child);
     void pmxCrossover(int* parent1, int* parent2, int* child);
-    void crossoverPMX(int* parent1, int* parent2, int* child);
     void orderCrossover(int* parent1, int* parent2, int* child);
     void (GeneticAlgorithm::*crossoverFunc)(int*, int*, int*) = &orderCrossover; // Wskaźnik na funkcję definiującą sąsiedztwo
     void mutate(int* route);
-    void displayMatrix(int** matrix, int n);
-    void displayArray(int* arr, int n);
-    bool isParent(int* parents, int target);
     int findEl(int* arr, int size, int target);
     bool isUnique(int* arr, int size);
     bool inArr(int* arr, int size, int target);

@@ -37,8 +37,7 @@ void App::run()
             }
             break;
         case '2':
-            // path = menu.inputPath();
-                path = "ftv170.atsp";
+            path = menu.inputPath();
             model.loadFromFile(path);
             ts.setDistanceMatrix(model.getDistanceMatrix());
             ts.setNumCities(model.getNumCities());

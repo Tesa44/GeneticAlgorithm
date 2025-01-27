@@ -14,14 +14,6 @@
 
 using namespace std;
 
-// Konstruktor
-// GeneticAlgorithm::GeneticAlgorithm(double** distances, int numCities, int populationSize, int generations, double mutationRate, int tournamentSize)
-    // : distances(distances), numCities(numCities), populationSize(populationSize),
-      // generations(generations), mutationRate(mutationRate), tournamentSize(tournamentSize),
-      // gen(std::random_device{}()) {}
-
-// Destruktor
-
 // Funkcja kosztu - dystans pomiędzy miastami
 int GeneticAlgorithm::calculateDistance(int* route) {
     int cost = 0;
@@ -40,22 +32,7 @@ void GeneticAlgorithm::generateRandomRoute(int* route) {
     shuffle(route, route + numCities, gen);
 }
 
-// Selekcja turniejowa
-void GeneticAlgorithm::tournamentSelection(int** population, int* fitness, int* selected) {
-    uniform_int_distribution<> dist(0, populationSize - 1);
-    int bestIndex = dist(gen);
-    int bestFitness = fitness[bestIndex];
-
-    for (int i = 1; i < tournamentSize; ++i) {
-        int candidateIndex = dist(gen);
-        if (fitness[candidateIndex] < bestFitness) {
-            bestIndex = candidateIndex;
-            bestFitness = fitness[candidateIndex];
-        }
-    }
-    memcpy(selected, population[bestIndex], numCities * sizeof(int));
-}
-
+//Selekcja turniejowa
 void GeneticAlgorithm::tournamentSelectionDistinct(int** population, int* fitness, int* parent1, int* parent2) {
     uniform_int_distribution<> dist(0, populationSize - 1);
 
@@ -91,56 +68,8 @@ void GeneticAlgorithm::tournamentSelectionDistinct(int** population, int* fitnes
     }
     // Kopiowanie parent2
     memcpy(parent2, population[bestIndex2], numCities * sizeof(int));
-
-    // cout << "p1: " << bestIndex1 << " p2: " << bestIndex2 << endl;
 }
 
-void GeneticAlgorithm::chooseParents(int** population, int* fitness, int* parent1, int* parent2, int* areParents)
-{
-    uniform_int_distribution<> dist(0, populationSize - 1);
-    int index1 = dist(gen);
-    while (isParent(areParents,index1)) {
-        index1 = dist(gen);
-    }
-    // Kopiowanie parent1
-    memcpy(parent1, population[index1], numCities * sizeof(int));
-    areParents[index1] = 1;
-
-    int index2 = dist(gen);
-    while (isParent(areParents,index2)) {
-        index2 = dist(gen);
-    }
-    // Kopiowanie parent2
-    memcpy(parent2, population[index2], numCities * sizeof(int));
-    areParents[index2] = 1;
-}
-
-
-// Krzyżowanie jednopunktowe
-void GeneticAlgorithm::crossover(int* parent1, int* parent2, int* child) {
-    uniform_int_distribution<> dist(0, numCities - 1);
-    int start = dist(gen);
-    int end = dist(gen);
-
-    if (start > end) swap(start, end);
-
-    bool* used = new bool[numCities]();
-    for (int i = start; i <= end; ++i) {
-        child[i] = parent1[i];
-        used[parent1[i]] = true;
-    }
-
-    int currentIdx = (end + 1) % numCities;
-    for (int i = 0; i < numCities; ++i) {
-        int city = parent2[(end + 1 + i) % numCities];
-        if (!used[city]) {
-            child[currentIdx] = city;
-            currentIdx = (currentIdx + 1) % numCities;
-        }
-    }
-
-    delete[] used;
-}
 
 void GeneticAlgorithm::orderCrossover(int* parent1, int* parent2, int* child) {
     // Losowy wybór dwóch punktów podziału
@@ -227,64 +156,6 @@ void GeneticAlgorithm::pmxCrossover(int* parent1, int* parent2, int* child) {
     }
 }
 
-// Metoda krzyżowania PMX (Partially Mapped Crossover)
-void GeneticAlgorithm::crossoverPMX(int* parent1, int* parent2, int* child) {
-    std::uniform_int_distribution<> dist(0, numCities - 1);
-
-    // Losowanie punktów podziału
-    int start = dist(gen);
-    int end = dist(gen);
-    if (start > end) {
-        std::swap(start, end);
-    }
-
-    // Inicjalizacja dziecka
-    for (int i = 0; i < numCities; ++i) {
-        child[i] = -1;
-    }
-
-    // Kopiowanie segmentu z rodzica 1 do dziecka
-    for (int i = start; i <= end; ++i) {
-        child[i] = parent1[i];
-    }
-
-    // Mapowanie brakujących elementów z rodzica 2
-    for (int i = start; i <= end; ++i) {
-        int mappedCity = parent2[i];
-
-        // Sprawdzenie konfliktu
-        if (std::find(child + start, child + end + 1, mappedCity) == child + end + 1) {
-            int pos = i;
-
-            // Znajdowanie unikalnej pozycji w cyklu
-            while (std::find(child + start, child + end + 1, parent1[pos]) != child + end + 1) {
-                for (int k = 0; k < numCities; ++k) {
-                    if (parent2[k] == parent1[pos]) {
-                        pos = k;
-                        break;
-                    }
-                }
-            }
-
-            // Wstawienie elementu w odpowiednie miejsce
-            child[pos] = mappedCity;
-        }
-    }
-
-    // Wypełnienie pozostałych miejsc z rodzica 2
-    int childIndex = 0;
-    for (int i = 0; i < numCities; ++i) {
-        if (std::find(child, child + numCities, parent2[i]) == child + numCities) {
-            while (child[childIndex] != -1) {
-                ++childIndex;
-            }
-            child[childIndex] = parent2[i];
-        }
-    }
-}
-
-
-
 // Mutacja - inversion Mutation
 void GeneticAlgorithm::mutate(int* route) {
     uniform_int_distribution<> dist(0, numCities - 1);
@@ -300,106 +171,6 @@ void GeneticAlgorithm::mutate(int* route) {
 }
 
 
-// int* GeneticAlgorithm::solve() {
-//     auto startTime = std::chrono::steady_clock::now();
-//     int* bestRoute = new int[numCities + 1];
-//     int bestCost = numeric_limits<int>::max();
-//     double bestFindTime = 0;
-//     while (true) {
-//         auto currentTime = std::chrono::steady_clock::now();
-//         double elapsedTime = std::chrono::duration<double>(currentTime - startTime).count();
-//         if (elapsedTime > timeLimit) break;
-//         // Inicjalizacja populacji
-//         int** population = new int*[populationSize];
-//         for (int i = 0; i < populationSize; ++i) {
-//             population[i] = new int[numCities];
-//             generateRandomRoute(population[i]);
-//         }
-//         // for (int i = 0; i < populationSize; ++i)
-//         // {
-//         // displayArray(population[i],numCities);
-//         // }
-//
-//         int* fitness = new int[populationSize];
-//
-//         int elitismCount = static_cast<int>(elitismRate * populationSize);
-//
-//         // Ewolucja
-//         for (int generation = 0; generation < generations; ++generation) {
-//             // Obliczanie przystosowania
-//             for (int i = 0; i < populationSize; ++i) {
-//                 fitness[i] = calculateDistance(population[i]);
-//             }
-//             // Tworzenie nowej populacji
-//             int** newPopulation = new int*[populationSize];
-//
-//             // Elitarne osobniki - kopiowanie najlepszych do nowej populacji
-//             for (int i = 0; i < elitismCount; i++) {
-//                 newPopulation[i] = new int[numCities];
-//                 int bestIndex = min_element(fitness, fitness + populationSize) - fitness;
-//                 memcpy(newPopulation[i], population[bestIndex], numCities * sizeof(int));
-//                 fitness[bestIndex] = numeric_limits<int>::max(); // Wyklucz najlepszy z kolejnych wyborów
-//
-//             }
-//
-//             // Reszta populacji - krzyżowanie i mutacja
-//             for (int i = elitismCount; i < populationSize; i+=2) {
-//                 newPopulation[i] = new int[numCities];
-//                 newPopulation[i+1] = new int[numCities];
-//                 int* parent1 = new int[numCities];
-//                 int* parent2 = new int[numCities];
-//                 //Wybieranie rodziców
-//                 tournamentSelectionDistinct(population,fitness,parent1,parent2);
-//                 // Krzyżowanie z prawdopodobieństwem crossoverRate
-//                 if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
-//                     (this->*crossoverFunc)(parent1,parent2,newPopulation[i]);
-//                     (this->*crossoverFunc)(parent2,parent1,newPopulation[i+1]);
-//                 } else {
-//                     // Brak krzyżowania, kopiowanie rodzica
-//                     memcpy(newPopulation[i], parent1, numCities * sizeof(int));
-//                     memcpy(newPopulation[i+1], parent2, numCities * sizeof(int));
-//                 }
-//                 // Mutacja
-//                 if (uniform_real_distribution<>(0.0, 1.0)(gen) < mutationRate) {
-//                     mutate(newPopulation[i]);
-//                     mutate(newPopulation[i+1]);
-//                 }
-//                 delete[] parent1;
-//                 delete[] parent2;
-//             }
-//             // Zamiana starej populacji na nową
-//             for (int i = 0; i < populationSize; ++i) {
-//                 delete[] population[i];
-//             }
-//             delete[] population;
-//
-//             population = newPopulation;
-//         }
-//
-//         // Znalezienie najlepszego rozwiązania
-//         // bestRoute = new int[numCities + 1];
-//
-//         for (int i = 0; i < populationSize; ++i) {
-//             int cost = calculateDistance(population[i]);
-//             if (cost < bestCost) {
-//                 bestCost = cost;
-//                 memcpy(bestRoute, population[i], numCities * sizeof(int));
-//                 bestRoute[numCities] = bestRoute[0];
-//                 bestFindTime = elapsedTime;
-//             }
-//         }
-//
-//         // Czyszczenie pamięci
-//         for (int i = 0; i < populationSize; ++i) {
-//             delete[] population[i];
-//         }
-//         delete[] population;
-//         delete[] fitness;
-//     }
-//     cout << "Czas znalezienia najlepszego rozwiazania: " << bestFindTime << " [s]" << endl;
-//     return bestRoute;
-// }
-
 int* GeneticAlgorithm::solve() {
     auto startTime = std::chrono::steady_clock::now();
     int* bestRoute = new int[numCities + 1];
@@ -409,7 +180,7 @@ int* GeneticAlgorithm::solve() {
     int opt = 2755;
     double interval = 10.0; //Interwal co ile mierzymy sredni błąd względny
     double lastMeasurementTime = 0.0;
-    int measurementSize = 100;
+    int measurementSize = 24;
     double* measurement = new double[measurementSize];
     int measurementIndex = 0;
 
@@ -422,7 +193,6 @@ int* GeneticAlgorithm::solve() {
 
     int* fitness = new int[populationSize];
     int elitismCount = static_cast<int>(elitismRate * populationSize);
-    int iterations = 0;
     while (true) {
         auto currentTime = std::chrono::steady_clock::now();
         double elapsedTime = std::chrono::duration<double>(currentTime - startTime).count();
@@ -430,7 +200,6 @@ int* GeneticAlgorithm::solve() {
         {
             break;
         };
-        iterations++;
         // Obliczanie przystosowania
         for (int i = 0; i < populationSize; ++i) {
             fitness[i] = calculateDistance(population[i]);
@@ -441,7 +210,6 @@ int* GeneticAlgorithm::solve() {
             double avgResult = countAvgResult(fitness);
             double avgError = (avgResult - opt) / opt;
             measurement[measurementIndex++] = avgError;
-            // cout << "Blad wzgledny w" << elapsedTime << " sekundzie: " <<avgError << " Sredni wynik: " << avgResult <<endl;
             lastMeasurementTime = elapsedTime;
         }
 
@@ -465,17 +233,11 @@ int* GeneticAlgorithm::solve() {
 
             // Wybieranie rodziców
             tournamentSelectionDistinct(population, fitness, parent1, parent2);
-            // cout << "parent1 " << endl;
-            // displayArray(parent1, numCities);
-            // cout << "parent2 " << endl;
-            // displayArray(parent2,numCities);
-            // Krzyżowanie z prawdopodobieństwem crossoverRate
+
+            //Krzyżowanie
             if (uniform_real_distribution<>(0.0, 1.0)(gen) < crossoverRate) {
                 (this->*crossoverFunc)(parent1, parent2, newPopulation[i]);
                 (this->*crossoverFunc)(parent2, parent1, newPopulation[i + 1]);
-                // displayArray(newPopulation[i],numCities);
-                // displayArray(newPopulation[i + 1],numCities);
-                // getch();
             } else {
                 // Brak krzyżowania, kopiowanie rodzica
                 memcpy(newPopulation[i], parent1, numCities * sizeof(int));
@@ -494,7 +256,7 @@ int* GeneticAlgorithm::solve() {
             delete[] parent2;
         }
 
-        // Zamiana starej populacji na nową
+        // Zamiana starej populacji na nową (sukcesja)
         for (int i = 0; i < populationSize; ++i) {
             delete[] population[i];
         }
@@ -507,7 +269,6 @@ int* GeneticAlgorithm::solve() {
             int cost = calculateDistance(population[i]);
             if (cost < bestCost) {
                 bestCost = cost;
-                // cout << bestCost << endl;
                 memcpy(bestRoute, population[i], numCities * sizeof(int));
                 bestRoute[numCities] = bestRoute[0];
                 bestFindTime = elapsedTime;
@@ -521,7 +282,6 @@ int* GeneticAlgorithm::solve() {
     double avgResult = countAvgResult(fitness);
     double avgError = (avgResult - opt) / opt;
     measurement[measurementIndex] = avgError;
-    // cout << "Blad wzgledny w" << timeLimit << " sekundzie: " <<avgError << " Sredni wynik: " << avgResult <<endl;
 
     // Czyszczenie pamięci
     for (int i = 0; i < populationSize; ++i) {
@@ -531,9 +291,8 @@ int* GeneticAlgorithm::solve() {
     delete[] fitness;
 
     std::cout << "Czas znalezienia najlepszego rozwiązania: " << bestFindTime << " [s]" << std::endl;
-    // cout << "Liczba iteracji: " << iterations << endl;
-    cout << "Srednie bledy wzgledne: "<< endl;
-    displayArraydouble(measurement,measurementSize);
+    // cout << "Srednie bledy wzgledne: "<< endl;
+    // displayArraydouble(measurement,measurementSize);
     delete[] measurement;
     return bestRoute;
 }
@@ -561,27 +320,6 @@ void GeneticAlgorithm::setNumCities(int newNumCities) {
     numCities = newNumCities;
 }
 
-void GeneticAlgorithm::displayMatrix(int** matrix, int n)
-{
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < n; j++)
-        {
-            printf("%-5d",matrix[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void GeneticAlgorithm::displayArray(int* arr, int n) {
-    cout << "[ ";
-    for (int i = 0 ; i < n ; i++)
-    {
-        cout << arr[i] << " ";
-    }
-    cout << "]" << endl;
-}
-
 void GeneticAlgorithm::displayArraydouble(double* arr, int n) {
     cout << "[ ";
     for (int i = 0 ; i < n ; i++)
@@ -589,14 +327,6 @@ void GeneticAlgorithm::displayArraydouble(double* arr, int n) {
         cout << arr[i] << " ";
     }
     cout << "]" << endl;
-}
-
-bool GeneticAlgorithm::isParent(int* parents, int target) {
-    if (parents[target] == 1)
-    {
-        return true;
-    }
-    return false;
 }
 
 int GeneticAlgorithm::findEl(int* arr, int size, int target)
