@@ -36,7 +36,7 @@ osiągnieciu limitu czasu.
 ### Uruchomienie programu
 1. Sklonuj repozytorium:
     ```sh
-   git clone https://github.com/Tesa44/PEA-projekt-3.git
+   git clone https://github.com/Tesa44/GeneticAlgorithm.git
 2. Otwórz projekt w CLion
 3. Skonfiguruj kompilator
 4. Zbuduj projekt
@@ -54,7 +54,7 @@ The Genetic Algorithm is a metaheuristic optimization method inspired by evoluti
 ### Startup
 1. Clone the repo
    ```sh
-   git clone https://github.com/Tesa44/PEA-projekt-3.git
+   git clone https://github.com/Tesa44/GeneticAlgorithm.git
 2. Open project in CLion
 3. Configure compiler
 4. Build the project
